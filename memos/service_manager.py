@@ -203,9 +203,12 @@ import logging
 import signal
 from pathlib import Path
 
+log_dir = {log_dir!r}
+pid = {pid!r}
+
 # Configure logging
 logging.basicConfig(
-    filename="{log_dir}/restart_serve.log",
+    filename=f"{{log_dir}}/restart_serve.log",
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
@@ -227,18 +230,18 @@ try:
     logging.info(f"Restart script started with PID: {{os.getpid()}}")
     
     # Wait for original service to terminate
-    logging.info(f"Waiting for serve service (PID: {pid}) to terminate...")
-    if not wait_for_process_exit({pid}, timeout=5):
+    logging.info(f"Waiting for serve service (PID: {{pid}}) to terminate...")
+    if not wait_for_process_exit(pid, timeout=5):
         logging.warning("Old service did not terminate in time")
     
     # Start new service
     logging.info("Starting serve service...")
-    python_path = "{sys.executable}"
+    python_path = sys.executable
     cmd = [python_path, "-m", "memos.commands", "serve"]
     
     if sys.platform == "win32":
         pythonw_path = python_path.replace("python.exe", "pythonw.exe")
-        with open("{log_dir}/serve.log", "a") as log_file:
+        with open(f"{{log_dir}}/serve.log", "a") as log_file:
             process = subprocess.Popen(
                 [pythonw_path, "-m", "memos.commands", "serve"],
                 stdout=log_file,
@@ -246,7 +249,7 @@ try:
                 creationflags=subprocess.CREATE_NEW_CONSOLE
             )
     else:
-        with open("{log_dir}/serve.log", "a") as log_file:
+        with open(f"{{log_dir}}/serve.log", "a") as log_file:
             process = subprocess.Popen(
                 cmd,
                 stdout=log_file,
